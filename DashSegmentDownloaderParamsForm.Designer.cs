@@ -39,6 +39,7 @@
             this.checkedListBoxTracks = new System.Windows.Forms.CheckedListBox();
             this.folderBrowserOutput = new System.Windows.Forms.FolderBrowserDialog();
             this.openFileManifest = new System.Windows.Forms.OpenFileDialog();
+            this.buttonSelectAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonBrowseManifest
@@ -47,7 +48,7 @@
             this.buttonBrowseManifest.Name = "buttonBrowseManifest";
             this.buttonBrowseManifest.Size = new System.Drawing.Size(75, 23);
             this.buttonBrowseManifest.TabIndex = 0;
-            this.buttonBrowseManifest.Text = "Browser";
+            this.buttonBrowseManifest.Text = "Browse";
             this.buttonBrowseManifest.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.buttonBrowseManifest.UseVisualStyleBackColor = true;
             this.buttonBrowseManifest.Click += new System.EventHandler(this.buttonBrowseManifest_Click);
@@ -111,7 +112,7 @@
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 5;
-            this.button1.Text = "Browser";
+            this.button1.Text = "Browse";
             this.button1.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -129,11 +130,23 @@
             this.openFileManifest.Filter = "MPD Files|*.mpd";
             this.openFileManifest.Title = "Select Your Manifest File";
             // 
+            // buttonSelectAll
+            // 
+            this.buttonSelectAll.Location = new System.Drawing.Point(654, 115);
+            this.buttonSelectAll.Name = "buttonSelectAll";
+            this.buttonSelectAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonSelectAll.TabIndex = 9;
+            this.buttonSelectAll.Text = "Select All";
+            this.buttonSelectAll.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.buttonSelectAll.UseVisualStyleBackColor = true;
+            this.buttonSelectAll.Click += new System.EventHandler(this.buttonSelectAll_Click);
+            // 
             // DashSegmentDownloaderParamsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(749, 450);
+            this.Controls.Add(this.buttonSelectAll);
             this.Controls.Add(this.checkedListBoxTracks);
             this.Controls.Add(this.textBoxOutFolder);
             this.Controls.Add(this.labelOutputFolder);
@@ -167,6 +180,7 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserOutput;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.OpenFileDialog openFileManifest;
+        private System.Windows.Forms.Button buttonSelectAll;
     }
 }
 

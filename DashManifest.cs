@@ -40,8 +40,9 @@ namespace Dash_Downloader
                .Append("Segment Start Index: ").AppendLine(segmentStartIndex + "")
                .Append("Segment Count: ").AppendLine(segmentCount + "")
                .Append("InitSegment Template: ").AppendLine(initSegmentTemplate)
-               .Append("Media Segment Template: ").AppendLine(mediaSegmentTemplate);
-
+               .Append("Media Segment Template: ").AppendLine(mediaSegmentTemplate)
+               .Append("User Selected: ").AppendLine(selected+"");
+               
                 return sb.ToString();
             }
         }

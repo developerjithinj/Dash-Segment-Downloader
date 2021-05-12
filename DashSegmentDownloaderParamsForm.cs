@@ -17,28 +17,23 @@ namespace Dash_Downloader
 
         private void buttonDownload_Click(object sender, EventArgs e)
         {
-
-
             if (validateInputParameters())
             {
 
-
-                for (int i = 0; i < checkedListBoxTracks.Items.Count; i++)
+                for (int i = 0; i < (checkedListBoxTracks.Items.Count); i++)
                 {
-                    CheckState st = checkedListBoxTracks.GetItemCheckState(checkedListBoxTracks.Items.IndexOf(i));
-                    //dashManifest.tracks[i].selected = st == CheckState.Checked;
-
+                    ((DashManifest.Track)dashManifest.tracks[i]).selected = checkedListBoxTracks.GetItemChecked(i);
                 }
+
+                SegmentDownloaderForm segmentDownloader = new SegmentDownloaderForm(dashManifest);
+                segmentDownloader.ShowDialog();
             }
         }
 
         //Basic Validations before downloading
         private bool validateInputParameters()
         {
-            if (dashManifest == null)
-            {
-                return false;
-            }
+
             if (textBoxManifestFile.Text.Length <= 0)
             {
                 DialogUtil.showNoRetryError("Please select the manifest file first");
@@ -53,8 +48,11 @@ namespace Dash_Downloader
             }
             if (checkedListBoxTracks.CheckedItems.Count <= 0)
             {
-
                 DialogUtil.showNoRetryError("Please select atleast one track to download");
+                return false;
+            }
+            if (dashManifest == null)
+            {
                 return false;
             }
 
@@ -96,7 +94,6 @@ namespace Dash_Downloader
             {
                 checkedListBoxTracks.Items.Add(getTrackText(track));
             }
-            Debug.WriteLine(dashManifest.ToString());
         }
 
         private string getTrackText(DashManifest.Track track)
@@ -122,6 +119,14 @@ namespace Dash_Downloader
             }
             sb.Append(")");
             return sb.ToString();
+        }
+
+        private void buttonSelectAll_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < checkedListBoxTracks.Items.Count; i++)
+            {
+                checkedListBoxTracks.SetItemChecked(i, true);
+            }
         }
     }
 
