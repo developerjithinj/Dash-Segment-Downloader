@@ -38,7 +38,6 @@
             this.button1 = new System.Windows.Forms.Button();
             this.checkedListBoxTracks = new System.Windows.Forms.CheckedListBox();
             this.folderBrowserOutput = new System.Windows.Forms.FolderBrowserDialog();
-            this.openFileManifest = new System.Windows.Forms.OpenFileDialog();
             this.buttonSelectAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -48,7 +47,7 @@
             this.buttonBrowseManifest.Name = "buttonBrowseManifest";
             this.buttonBrowseManifest.Size = new System.Drawing.Size(75, 23);
             this.buttonBrowseManifest.TabIndex = 0;
-            this.buttonBrowseManifest.Text = "Browse";
+            this.buttonBrowseManifest.Text = "Fetch";
             this.buttonBrowseManifest.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.buttonBrowseManifest.UseVisualStyleBackColor = true;
             this.buttonBrowseManifest.Click += new System.EventHandler(this.buttonBrowseManifest_Click);
@@ -74,7 +73,7 @@
             // 
             // textBoxManifestFile
             // 
-            this.textBoxManifestFile.Enabled = false;
+            this.textBoxManifestFile.AllowDrop = true;
             this.textBoxManifestFile.Location = new System.Drawing.Point(118, 28);
             this.textBoxManifestFile.Name = "textBoxManifestFile";
             this.textBoxManifestFile.Size = new System.Drawing.Size(518, 23);
@@ -125,11 +124,6 @@
             this.checkedListBoxTracks.Size = new System.Drawing.Size(518, 256);
             this.checkedListBoxTracks.TabIndex = 8;
             // 
-            // openFileManifest
-            // 
-            this.openFileManifest.Filter = "MPD Files|*.mpd";
-            this.openFileManifest.Title = "Select Your Manifest File";
-            // 
             // buttonSelectAll
             // 
             this.buttonSelectAll.Location = new System.Drawing.Point(654, 115);
@@ -179,7 +173,6 @@
         private System.Windows.Forms.CheckedListBox checkedListBoxTracks;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserOutput;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
-        private System.Windows.Forms.OpenFileDialog openFileManifest;
         private System.Windows.Forms.Button buttonSelectAll;
     }
 }

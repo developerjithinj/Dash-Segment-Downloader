@@ -10,7 +10,9 @@ namespace Dash_Downloader
     public class DashManifest
     {
         public double mediaDuration;
+        public string remoteUrl = "";
         public string path;
+        public bool isLocal;
         public ArrayList tracks = new ArrayList();
         public class Track
         {
@@ -41,17 +43,18 @@ namespace Dash_Downloader
                .Append("Segment Count: ").AppendLine(segmentCount + "")
                .Append("InitSegment Template: ").AppendLine(initSegmentTemplate)
                .Append("Media Segment Template: ").AppendLine(mediaSegmentTemplate)
-               .Append("User Selected: ").AppendLine(selected+"");
-               
+               .Append("User Selected: ").AppendLine(selected + "");
+
                 return sb.ToString();
             }
         }
         override public string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("Path: ").AppendLine(path)
-                .Append("Duration: ").AppendLine(mediaDuration + "")
-                .AppendLine("Tracks:").AppendLine();
+            sb.Append("Remote URL: ").AppendLine(remoteUrl)
+              .Append("Path: ").AppendLine(path)
+              .Append("Duration: ").AppendLine(mediaDuration + "")
+              .AppendLine("Tracks:").AppendLine();
 
             foreach (Track track in tracks)
             {
@@ -61,13 +64,15 @@ namespace Dash_Downloader
             return sb.ToString();
         }
 
-        public static DashManifest parseManifest(string fileUrl)
+
+        public static DashManifest parseManifestData(XmlDocument doc, String uri, bool isLocal)
         {
+
             DashManifest returnManifest = new DashManifest();
 
-            XmlDocument doc = new XmlDocument();
-            //Load xml file
-            doc.Load(fileUrl);
+            //Get base url
+            returnManifest.remoteUrl = uri.Replace(System.IO.Path.GetFileName(uri), "");
+            returnManifest.isLocal = isLocal;
 
             //Get high level nodes
             XmlNode mpdNode = doc.GetElementsByTagName("MPD")[0];

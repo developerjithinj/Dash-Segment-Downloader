@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Text;
 using System.Windows.Forms;
-
+using System.Xml;
 
 namespace Dash_Downloader
 {
@@ -40,6 +42,16 @@ namespace Dash_Downloader
                 return false;
 
             }
+            if (dashManifest == null)
+            {
+                DialogUtil.showNoRetryError("Manifest unavailable. Fetch manifest and try again");
+                return false;
+            }
+            if (dashManifest.isLocal)
+            {
+                DialogUtil.showNoRetryError("Segment download unavailable for local files");
+                return false;
+            }
             if (textBoxOutFolder.Text.Length <= 0)
             {
                 DialogUtil.showNoRetryError("Please select the output folder");
@@ -51,22 +63,41 @@ namespace Dash_Downloader
                 DialogUtil.showNoRetryError("Please select atleast one track to download");
                 return false;
             }
-            if (dashManifest == null)
-            {
-                return false;
-            }
 
             return true;
         }
 
         private void buttonBrowseManifest_Click(object sender, EventArgs e)
         {
-            if (openFileManifest.ShowDialog() == DialogResult.OK)
+            string xmlData = "";
+            bool isLocal = true;
+            string uri = textBoxManifestFile.Text;
+            if (Uri.IsWellFormedUriString(uri, UriKind.Absolute))
             {
-                string manifestFile = openFileManifest.FileName;
-                textBoxManifestFile.Text = manifestFile;
-                populateManifest(manifestFile);
+                using (var client = new WebClient())
+                {
+                    xmlData = (client).DownloadString(uri);
+                    Debug.WriteLine(xmlData);
+                    isLocal = false;
+                }
+
             }
+            else if (File.Exists(uri))
+            {
+                xmlData = File.ReadAllText(uri);
+                DialogUtil.showNoRetryError("You've selected a local file. The tracks will be listed but, segment download won't work.");
+            }
+            else
+            {
+                DialogUtil.showNoRetryError("Invalid manifest file path");
+                return;
+            }
+            if (xmlData.Length <= 0)
+            {
+                DialogUtil.showNoRetryError("Failed to fetch manifest file");
+                return;
+            }
+            populateManifest(xmlData, uri, isLocal);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -78,10 +109,22 @@ namespace Dash_Downloader
             }
         }
 
-        private void populateManifest(String manifestFile)
+        private void populateManifest(String manifestData, String uri, bool isLocal)
         {
             checkedListBoxTracks.Items.Clear();
-            dashManifest = DashManifest.parseManifest(manifestFile);
+            XmlDocument doc = new XmlDocument();
+            try
+            {
+                //Load xml file
+                doc.LoadXml(manifestData);
+            }
+            catch (Exception e)
+            {
+                DialogUtil.showNoRetryError("Invalid manifest file");
+                return;
+            }
+
+            dashManifest = DashManifest.parseManifestData(doc, uri, isLocal);
             if (dashManifest == null)
             {
                 textBoxManifestFile.Text = "";
