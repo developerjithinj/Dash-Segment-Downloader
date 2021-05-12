@@ -11,6 +11,10 @@ namespace Dash_Downloader
 
         public static string getAttributeValue(string key, XmlNode node)
         {
+            if (key == null || node == null)
+            {
+                return "";
+            }
             XmlNode xmlNode = node.Attributes.GetNamedItem(key);
             if (xmlNode != null)
             {

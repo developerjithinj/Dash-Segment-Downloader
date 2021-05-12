@@ -9,9 +9,9 @@ namespace Dash_Downloader
 {
     public class DashManifest
     {
-        double mediaDuration;
-        string path;
-        ArrayList tracks = new ArrayList();
+        public double mediaDuration;
+        public string path;
+        public ArrayList tracks = new ArrayList();
         public class Track
         {
             public string id;
@@ -25,6 +25,7 @@ namespace Dash_Downloader
             public int segmentCount;
             public string initSegmentTemplate;
             public string mediaSegmentTemplate;
+            public bool selected;
 
             override public string ToString()
             {
@@ -73,16 +74,16 @@ namespace Dash_Downloader
             XmlNode baseUrlNode = XmlUtils.getNode("BaseURL", periodNode);
 
             //Compute total media durationin seconds
-            String mediaPresentationDuration = mpdNode.Attributes.GetNamedItem("mediaPresentationDuration").Value; //eg: PT1H30M30.042666S
+            String mediaPresentationDuration = XmlUtils.getAttributeValue("mediaPresentationDuration", mpdNode); //eg: PT1H30M30.042666S
             double hour = XmlUtils.getTime(mediaPresentationDuration, "H");
             double minute = XmlUtils.getTime(mediaPresentationDuration, "M");
             double seconds = XmlUtils.getTime(mediaPresentationDuration, "S");
             returnManifest.mediaDuration = hour * 3600 + minute * 60 + seconds;
 
             //Path after baseUrl
-            if (baseUrlNode.InnerText == null)
+            if (baseUrlNode == null || baseUrlNode.InnerText == null)
             {
-                returnManifest.path = "/";
+                returnManifest.path = "";
             }
             else
             {
@@ -100,11 +101,23 @@ namespace Dash_Downloader
                     XmlNode segmentTemplate = XmlUtils.getNode("SegmentTemplate", adaptationSet);
 
                     //Segment count and startIndex calculation
-                    string timescale = XmlUtils.getAttributeValue("timescale", segmentTemplate);
-                    string duration = XmlUtils.getAttributeValue("duration", segmentTemplate);
-                    long segmentDuration = long.Parse(duration) / long.Parse(timescale);
+                    string timescaleStr = XmlUtils.getAttributeValue("timescale", segmentTemplate);
+                    string durationStr = XmlUtils.getAttributeValue("duration", segmentTemplate);
+                    long timescale = 0;
+                    long duration = 0;
+                    long.TryParse(timescaleStr, out timescale);
+                    long.TryParse(durationStr, out duration);
+                    if (timescale == 0)
+                        timescale = 1;
+                    long segmentDuration = duration / timescale;
                     int segmentCount = (int)(returnManifest.mediaDuration / segmentDuration);
                     string startIndex = XmlUtils.getAttributeValue("startWithSAP", adaptationSet);
+
+                    //We won't support the mpd file
+                    if (segmentCount <= 0)
+                    {
+                        return null;
+                    }
 
                     string lang = XmlUtils.getAttributeValue("lang", adaptationSet);
                     string frameRate = XmlUtils.getAttributeValue("frameRate", adaptationSet);
