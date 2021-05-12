@@ -10,7 +10,8 @@ namespace Dash_Downloader
     public class DashManifest
     {
         public double mediaDuration;
-        public string remoteUrl = "";
+        public string remoteUrlBase = "";
+        public string remoteUri;
         public string path;
         public bool isLocal;
         public ArrayList tracks = new ArrayList();
@@ -51,7 +52,7 @@ namespace Dash_Downloader
         override public string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("Remote URL: ").AppendLine(remoteUrl)
+            sb.Append("Remote URL: ").AppendLine(remoteUrlBase)
               .Append("Path: ").AppendLine(path)
               .Append("Duration: ").AppendLine(mediaDuration + "")
               .AppendLine("Tracks:").AppendLine();
@@ -71,7 +72,8 @@ namespace Dash_Downloader
             DashManifest returnManifest = new DashManifest();
 
             //Get base url
-            returnManifest.remoteUrl = uri.Replace(System.IO.Path.GetFileName(uri), "");
+            returnManifest.remoteUri = uri;
+            returnManifest.remoteUrlBase = uri.Replace(System.IO.Path.GetFileName(uri), "");
             returnManifest.isLocal = isLocal;
 
             //Get high level nodes

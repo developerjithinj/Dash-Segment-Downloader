@@ -27,7 +27,7 @@ namespace Dash_Downloader
                     ((DashManifest.Track)dashManifest.tracks[i]).selected = checkedListBoxTracks.GetItemChecked(i);
                 }
 
-                SegmentDownloaderForm segmentDownloader = new SegmentDownloaderForm(dashManifest);
+                SegmentDownloaderForm segmentDownloader = new SegmentDownloaderForm(dashManifest,textBoxOutFolder.Text);
                 segmentDownloader.ShowDialog();
             }
         }
@@ -77,7 +77,6 @@ namespace Dash_Downloader
                 using (var client = new WebClient())
                 {
                     xmlData = (client).DownloadString(uri);
-                    Debug.WriteLine(xmlData);
                     isLocal = false;
                 }
 
