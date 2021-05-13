@@ -5,6 +5,28 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>Dash_Downloader</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>file_Video_download_icon-icons.com_68939.ico</ApplicationIcon>
+    <Authors>Jithin Jose</Authors>
+    <Company>DIAGNAL</Company>
+    <Product />
+    <PackageIcon>file_Video_download_icon-icons.com_68939.png</PackageIcon>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>c# key.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Jithin Jose\Downloads\file_Video_download_icon-icons.com_68939.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="C:\Users\Jithin Jose\Downloads\file_Video_download_icon-icons.com_68939.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>

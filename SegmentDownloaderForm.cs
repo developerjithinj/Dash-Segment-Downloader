@@ -42,19 +42,42 @@ namespace Dash_Downloader
             //Split download list for multiple threads
             int segmentListSize = segmentInfoList.Count;
             int downloadsPerThread = segmentListSize / threadCount;
+
+            ArrayList segmentInfoLListofLists = new ArrayList(threadCount);
+
             for (int i = 0; i < threadCount; i++)
             {
-                int index = i * downloadsPerThread;
-                int count = downloadsPerThread;
-
-                //When it's the last set, add the remaining items as weel 
-                if (i == threadCount - 1)
-                {
-                    count = segmentListSize - (index - downloadsPerThread + count);
-                }
-                downloadFiles(i == 0, new ArrayList(segmentInfoList.GetRange(index, count)), ProgressCallback);
-                //segmentInfoDownloadList.Add(segmentInfoList.GetRange(index, count));
+                segmentInfoLListofLists.Add(new ArrayList());
             }
+
+            int threadIndex = 0;
+            for (int i = 0; i < segmentListSize; i++)
+            {
+                if (threadIndex >= threadCount)
+                {
+                    threadIndex = 0;
+                }
+               ((ArrayList)segmentInfoLListofLists[threadIndex++]).Add(segmentInfoList[i]);
+
+            }
+            for (int i = 0; i < threadCount; i++)
+            {
+                downloadFiles(i == 0, (ArrayList)segmentInfoLListofLists[i], ProgressCallback);
+            }
+
+            //Alternative simple method for multi-threading. Issue with this aproach is that the bigger segments may endup at the last list on a single thread
+            /* for (int i = 0; i < threadCount; i++)
+             {
+                 int index = i * downloadsPerThread;
+                 int count = downloadsPerThread;
+
+                 //When it's the last set, add the remaining items as weel 
+                 if (i == threadCount - 1)
+                 {
+                     count = segmentListSize - (index - downloadsPerThread + count);
+                 }
+                 downloadFiles(i == 0, new ArrayList(segmentInfoList.GetRange(index, count)), ProgressCallback);
+            }*/
         }
 
 
@@ -150,11 +173,11 @@ namespace Dash_Downloader
             ArrayList urlList = new ArrayList();
             await Task.Run(() =>
             {
-                    //Add manifest as the first item
-                    urlList.Add(new SegmentInfo(dashManifest.manifestRemoteUri, dashManifest.manifestLocalUri));
+                //Add manifest as the first item
+                urlList.Add(new SegmentInfo(dashManifest.manifestRemoteUri, dashManifest.manifestLocalUri));
 
-                    //Loop through each segment and create URLs
-                    foreach (DashManifest.Track track in dashManifest.tracks)
+                //Loop through each segment and create URLs
+                foreach (DashManifest.Track track in dashManifest.tracks)
                 {
                     if (track.selected)
                     {

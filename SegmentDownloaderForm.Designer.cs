@@ -49,6 +49,7 @@ namespace Dash_Downloader
             this.labelProgress.Name = "labelProgress";
             this.labelProgress.Size = new System.Drawing.Size(443, 24);
             this.labelProgress.TabIndex = 1;
+            this.labelProgress.Text = "Initializing downloads...";
             // 
             // buttonCancel
             // 

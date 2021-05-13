@@ -165,7 +165,7 @@
             this.numericUpDownThreads.TabIndex = 12;
             this.numericUpDownThreads.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numericUpDownThreads.Value = new decimal(new int[] {
-            1,
+            6,
             0,
             0,
             0});
