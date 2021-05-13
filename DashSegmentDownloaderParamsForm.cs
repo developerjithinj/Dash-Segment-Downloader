@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -26,8 +27,16 @@ namespace Dash_Downloader
                 {
                     ((DashManifest.Track)dashManifest.tracks[i]).selected = checkedListBoxTracks.GetItemChecked(i);
                 }
-
-                SegmentDownloaderForm segmentDownloader = new SegmentDownloaderForm(dashManifest,textBoxOutFolder.Text);
+                int threads = (int)numericUpDownThreads.Value;
+                if (threads <= 0)
+                {
+                    threads = 1;
+                }
+                else if (threads > 12)
+                {
+                    threads = 12;
+                }
+                SegmentDownloaderForm segmentDownloader = new SegmentDownloaderForm(dashManifest, textBoxOutFolder.Text, threads);
                 segmentDownloader.ShowDialog();
             }
         }
@@ -69,16 +78,22 @@ namespace Dash_Downloader
 
         private void buttonBrowseManifest_Click(object sender, EventArgs e)
         {
+            checkedListBoxTracks.Items.Clear();
+            fetchAndParseManifest();
+        }
+
+        private async void fetchAndParseManifest()
+        {
             string xmlData = "";
             bool isLocal = true;
             string uri = textBoxManifestFile.Text;
             if (Uri.IsWellFormedUriString(uri, UriKind.Absolute))
-            {
-                using (var client = new WebClient())
-                {
-                    xmlData = (client).DownloadString(uri);
-                    isLocal = false;
-                }
+            {// Set cursor as hourglass
+                ManifestProgressModal progressModal = new ManifestProgressModal();
+                progressModal.Show();
+                xmlData = await DownloadManifestTask(uri);
+                isLocal = false;
+                progressModal.Close();
 
             }
             else if (File.Exists(uri))
@@ -99,6 +114,26 @@ namespace Dash_Downloader
             populateManifest(xmlData, uri, isLocal);
         }
 
+        private async Task<string> DownloadManifestTask(string uri)
+        {
+            string xmlData = null;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    using (var client = new WebClient())
+                    {
+                        xmlData = (client).DownloadString(uri);
+
+                    }
+                }
+                catch (Exception e) { }
+            });
+
+            return xmlData;
+        }
+
+
         private void button1_Click(object sender, EventArgs e)
         {
 
@@ -110,7 +145,6 @@ namespace Dash_Downloader
 
         private void populateManifest(String manifestData, String uri, bool isLocal)
         {
-            checkedListBoxTracks.Items.Clear();
             XmlDocument doc = new XmlDocument();
             try
             {
@@ -170,6 +204,7 @@ namespace Dash_Downloader
                 checkedListBoxTracks.SetItemChecked(i, true);
             }
         }
+
     }
 
 }

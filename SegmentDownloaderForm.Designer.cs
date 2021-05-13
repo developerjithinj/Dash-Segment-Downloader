@@ -78,7 +78,9 @@ namespace Dash_Downloader
             this.Controls.Add(this.labelProgress);
             this.Controls.Add(this.progressBarDownload);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
+            this.MaximizeBox = false;
             this.Name = "SegmentDownloaderForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SegmentDownloaderForm";
             this.ResumeLayout(false);
 

@@ -11,7 +11,8 @@ namespace Dash_Downloader
     {
         public double mediaDuration;
         public string remoteUrlBase = "";
-        public string remoteUri;
+        public string manifestRemoteUri;
+        public string manifestLocalUri;
         public string path;
         public bool isLocal;
         public ArrayList tracks = new ArrayList();
@@ -72,7 +73,7 @@ namespace Dash_Downloader
             DashManifest returnManifest = new DashManifest();
 
             //Get base url
-            returnManifest.remoteUri = uri;
+            returnManifest.manifestRemoteUri = uri;
             returnManifest.remoteUrlBase = uri.Replace(System.IO.Path.GetFileName(uri), "");
             returnManifest.isLocal = isLocal;
 

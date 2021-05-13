@@ -20,58 +20,67 @@ namespace Dash_Downloader
         private static int successCount;
         private static int totalCount;
         private static int failureCount;
-
-        public SegmentDownloaderForm(DashManifest dashManifest, string folderPath)
+        private bool completed;
+        public SegmentDownloaderForm(DashManifest dashManifest, string folderPath, int threadCount)
         {
             manifest = dashManifest;
             InitializeComponent();
             cancelDownloads = false;
+            completed = false;
             successCount = 0;
             failureCount = 0;
+            dashManifest.manifestLocalUri = folderPath + "\\manifest.mpd";
             string folderUri = createAndGetLocalFolderUri(folderPath, manifest.path);
-            initiateDownload(dashManifest, folderUri);
+            initiateDownload(dashManifest, folderUri, threadCount);
         }
 
-        private async void initiateDownload(DashManifest dashManifest, string folderPath)
+        private async void initiateDownload(DashManifest dashManifest, string folderPath, int threadCount)
         {
             ArrayList segmentInfoList = await generateUrls(dashManifest, folderPath);
             totalCount = segmentInfoList.Count - 1; // -1 for ignoring manifest info
-            await downloadFiles(segmentInfoList, ProgressCallback);
-            if (successCount == totalCount)
-            {
-                DialogUtil.showNoRetryError("All segements downloaded successfully");
-            }
-            else
-            {
-                DialogUtil.showNoRetryError("Download operation " + (cancelDownloads ? "cancelled" : "completed") + ". "
-                    + successCount + "/" + totalCount + " downloads successful");
-            }
 
-            this.Close();
+            //Split download list for multiple threads
+            int segmentListSize = segmentInfoList.Count;
+            int downloadsPerThread = segmentListSize / threadCount;
+            for (int i = 0; i < threadCount; i++)
+            {
+                int index = i * downloadsPerThread;
+                int count = downloadsPerThread;
+
+                //When it's the last set, add the remaining items as weel 
+                if (i == threadCount - 1)
+                {
+                    count = segmentListSize - (index - downloadsPerThread + count);
+                }
+                downloadFiles(i == 0, new ArrayList(segmentInfoList.GetRange(index, count)), ProgressCallback);
+                //segmentInfoDownloadList.Add(segmentInfoList.GetRange(index, count));
+            }
         }
 
 
-        public static async Task downloadFiles(ArrayList segmentInfoList, Action<string> progressTick)
+        public async Task downloadFiles(bool includesManifest, ArrayList segmentInfoList, Action<string, bool> progressTick)
         {
-
             await Task.Run(() =>
             {
-                Debug.WriteLine("segmentInfoList: " + segmentInfoList.Count);
                 var client = new WebClient();
-                try
+                if (includesManifest)
                 {
-                    SegmentInfo manifestInfo = (SegmentInfo)segmentInfoList[0];
-                    client.DownloadFile(new Uri(manifestInfo.remoteUri), manifestInfo.localUri);
+                    try
+                    {
+                        SegmentInfo manifestInfo = (SegmentInfo)segmentInfoList[0];
+                        client.DownloadFile(new Uri(manifestInfo.remoteUri), manifestInfo.localUri);
+                    }
+                    catch (Exception e)
+                    {
+                        //ignore
+                    }
+                    segmentInfoList.RemoveAt(0);
                 }
-                catch (Exception e)
-                {
-                    //ignore
-                }
-                segmentInfoList.RemoveAt(0);
                 foreach (SegmentInfo segmentInfo in segmentInfoList)
                 {
                     if (cancelDownloads)
                     {
+                        progressTick(segmentInfo.remoteUri, cancelDownloads);
                         break;
                     }
                     try
@@ -83,28 +92,57 @@ namespace Dash_Downloader
                     {
                         failureCount++;
                     }
-                    progressTick(segmentInfo.remoteUri);
+                    progressTick(segmentInfo.remoteUri, cancelDownloads);
                 }
             });
         }
-        delegate void ProgressCallbackDelegate(string url);
-        private void ProgressCallback(string url)
+        delegate void ProgressCallbackDelegate(string url, bool hasCancelled);
+        private void ProgressCallback(string url, bool hasCancelled)
         {
             int progress = successCount + failureCount;
 
             if (this.progressBarDownload.InvokeRequired)
             {
-                ProgressCallbackDelegate d = new ProgressCallbackDelegate(ProgressCallback);
-                this.Invoke(d, new object[] { url });
+                try
+                {
+                    ProgressCallbackDelegate d = new ProgressCallbackDelegate(ProgressCallback);
+                    this.Invoke(d, new object[] { url, hasCancelled });
+                }
+                catch (Exception e) { }
             }
             else
             {
-
-                progressBarDownload.Value = progress;
-                progressBarDownload.Maximum = totalCount;
-                labelProgress.Text = "Downloading segments in progress (" + progress + "/" + totalCount + ")";
-                labelUrl.Text = url;
+                if (!cancelDownloads)
+                {
+                    progressBarDownload.Value = progress;
+                    progressBarDownload.Maximum = totalCount;
+                    labelProgress.Text = "Downloading segments in progress (" + progress + "/" + totalCount + ")";
+                    labelUrl.Text = hasCancelled ? "Cancelling downloads..." : url;
+                }
+                if (progress == totalCount || cancelDownloads)
+                {
+                    progressCompleted();
+                }
             }
+        }
+
+        private void progressCompleted()
+        {
+            if (completed)
+            {
+                return;
+            }
+            completed = true;
+            if (successCount == totalCount)
+            {
+                DialogUtil.showNoRetryError("All segements downloaded successfully");
+            }
+            else
+            {
+                DialogUtil.showNoRetryError("Download operation " + (cancelDownloads ? "cancelled" : "completed") + ". "
+                    + successCount + "/" + totalCount + " downloads successful");
+            }
+            this.Close();
         }
 
         public static async Task<ArrayList> generateUrls(DashManifest dashManifest, string folderPath)
@@ -112,11 +150,11 @@ namespace Dash_Downloader
             ArrayList urlList = new ArrayList();
             await Task.Run(() =>
             {
-                //Add manifest as the first item
-                urlList.Add(new SegmentInfo(dashManifest.remoteUri, folderPath + "manifest.mpd"));
+                    //Add manifest as the first item
+                    urlList.Add(new SegmentInfo(dashManifest.manifestRemoteUri, dashManifest.manifestLocalUri));
 
-                //Loop through each segment and create URLs
-                foreach (DashManifest.Track track in dashManifest.tracks)
+                    //Loop through each segment and create URLs
+                    foreach (DashManifest.Track track in dashManifest.tracks)
                 {
                     if (track.selected)
                     {
@@ -153,7 +191,6 @@ namespace Dash_Downloader
             if (manifestPath.ToCharArray()[manifestPath.Length - 1] != '\\')
             {
                 manifestPath += "\\";
-
             }
             string savePath = folderPath + manifestPath;
             //Create missing directory structure
