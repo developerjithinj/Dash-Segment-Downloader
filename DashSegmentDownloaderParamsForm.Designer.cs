@@ -70,9 +70,9 @@
             this.labelManifestPath.AutoSize = true;
             this.labelManifestPath.Location = new System.Drawing.Point(28, 32);
             this.labelManifestPath.Name = "labelManifestPath";
-            this.labelManifestPath.Size = new System.Drawing.Size(77, 15);
+            this.labelManifestPath.Size = new System.Drawing.Size(80, 15);
             this.labelManifestPath.TabIndex = 2;
-            this.labelManifestPath.Text = "Manifest File:";
+            this.labelManifestPath.Text = "Manifest URL:";
             // 
             // textBoxManifestFile
             // 
